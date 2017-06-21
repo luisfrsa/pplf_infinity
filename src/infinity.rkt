@@ -26,6 +26,8 @@
 ;; lista com as representações dos blocos como caracteres
 (define blocos-reps (string->list " ╹╺┗╻┃┏┣╸┛━┻┓┫┳╋"))
 
+;;(define blocos-repr (list " " "╹" "╺" "┗" "╻" "┃" "┏" "┣" "╸" "┛" "━" "┻" "┓" "┫" "┳" "╋"))
+
 ;; Tamanho representa o tamanho de um jogo em altura e largura
 ;;     altura : Número - quantidade de linhas do jogo.
 ;;    largura : Número - quantidade de colunas do jogo.
@@ -74,7 +76,7 @@
 ;; --------------
 ;; Converte uma lista de binário em um decimal
 ;; Exemplo: (bin-dec (list 1 0 0 1))
-;;          > '(list 1 0 1 0)
+;;          > 10
 (define (bin-dec lista)
 	(define (core lista num multi)
 		(cond
@@ -126,15 +128,15 @@
 ;; Bloco Bloco -> Lógico
 ;; ---------------------
 ;; Verifica se o bloco-e se encaixa horizontalmente à esquerda do bloco-d
-;; 14 = '(X 1 1 0)
 ;; 3  = '(0 0 X 1)
-;; o first do bloco-e deve ser o mesmo que o terceiro elemento do bloco d
-;; Exemplo: (encaixa-h? 14 3)
+;; 14 = '(X 1 1 0)
+;; o terceiro elemento do bloco-e deve ser o mesmo que o first do bloco d
+;; Exemplo: (encaixa-h? '(0 0 1 1) '(1 1 1 0))
 ;;          > #t
 (define (encaixa-h? bloco-e bloco-d) 
 	(if (or  (empty? bloco-e) (empty? bloco-d)) 
 		#f 
-		(equal? (first bloco-e) (first (rest (rest bloco-d))))
+		(equal? (first (rest (rest bloco-e))) (first bloco-d))
 	)
 )
 
@@ -142,15 +144,15 @@
 ;; Bloco Bloco -> Lógico
 ;; ---------------------
 ;; Verifica se o bloco-t se encaixa verticalmente acima do bloco-b
-;; 14 = '(1 X 1 0)
 ;; 3  = '(0 0 1 X)
-;; o segundo do bloco-t deve ser o mesmo que o último do bloco b
-;; Exemplo: (encaixa-v? 14 3)
+;; 14 = '(1 X 1 0)
+;; o último do bloco-t deve ser o mesmo que o segundo do bloco b
+;; Exemplo: (encaixa-v? '(0 0 1 1) '(1 1 1 0))
 ;;          > #t
 (define (encaixa-v? bloco-t bloco-b)
 	(if (or  (empty? bloco-t) (empty? bloco-b)) 
 		#f 
-		(equal? (first (rest bloco-t)) (last bloco-b))
+		(equal? (last bloco-t) (first (rest bloco-b)))
 	)
 )
 
@@ -179,6 +181,69 @@
 ;; de se verificar o encaixe com o bloco abaixo, já que o mesmo ainda 
 ;; não existe na solução.
 (define (seguro? bloco solucao tam) #f)
+
+
+(define (caracter-numero char)
+	(define (core lista char count)
+		(cond
+			((empty? lista) #f)
+			(else (if (equal? (first lista) char) 
+				   count
+				   (core (rest lista) char (add1 count))
+				   )
+			)
+				
+		)
+	)
+	(core blocos-reps char 0)
+)
+(define (listachar-listanum lista)
+	(define (core listachar listanum)
+		(cond
+			((empty? listachar) listanum)
+			(else (core (rest listachar) (cons listanum (caracter-numero (first listachar)))))
+		)
+
+	)
+
+	(core lista empty)
+)
+(define (numero-caracter num)
+		(cond
+			((empty? num) #f)
+			(else (list-ref blocos-reps num))
+)
+		)
+
+;; Lista de caracteres -> lista de números
+;; Converte a lista de caracteres para lista de numeros
+;; Exemplo: (converter-arquivo-numero  (list "┗┃┳┓" "┫┻┣┃" "┃┫┣┣" "┏┫┃┗") )
+;;          > (list (0 6 6 1) (12 15 15 6) (1 10 10 0) (0 2 1 0))
+(define (converter-arquivo-numero lista-arquivo)
+	(define (core lista-arquivo lista-retorno)
+		(cond
+			((empty? lista-arquivo) lista-retorno)
+			(else (core (rest lista-arquivo) (cons lista-retorno (listachar-listanum  (string->list(first lista-arquivo))))))
+			)
+		)
+	(core lista-arquivo empty)
+	)
+
+;;string->list 
+
+;; String(direotrio) -> ????
+;; Faz leitura do diretorio do arquivo passado por parametro
+;; Exemplo: (ler-jogo "testes/5.txt")
+;;          > ????
+(define (abrir-arquivo diretorio)
+	(cond 
+		((empty? diretorio) #f)
+		(else  (converter-arquivo-numero (port->lines (open-input-file diretorio)))
+		)
+	))
+
+(abrir-arquivo "../testes/casos/05.txt")
+
 
 
 ;; String -> Jogo
@@ -231,6 +296,8 @@
 ;; A saída desta função é a escrita na tela do jogo resolvido, representado na
 ;; forma de caracteres. Caso o jogo não possua solução, nada deve ser escrito na
 ;; tela.
+
+;;eof-object?
+
 (define (main args)
 	(display args))
-
