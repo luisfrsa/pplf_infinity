@@ -53,6 +53,7 @@
 (define (get-lista-rotacoes lista) resolver) 
 
 
+
 ;; Decimal -> Lista binária
 ;; --------------
 ;; Converte um decimal em uma lista de binário
@@ -113,18 +114,19 @@
 		(cond
 			[(empty? lista) return]
 			[else 
-				(if (equal? primeiro lista) 
-					  return 
-					  (core (rotacionar lista) 
-			    	  (if (empty? primeiro) lista primeiro) 
-			    	  (cons (rotacionar lista) return)
-			    	  )
-			     )
+			(if (equal? primeiro lista) 
+				return 
+				(core (rotacionar lista) 
+					(if (empty? primeiro) lista primeiro) 
+					(cons (rotacionar lista) return)
+					)
+				)
 			]
+			)
 		)
-	)
 	(core lista empty empty)
-)
+	)
+
 ;; Bloco Bloco -> Lógico
 ;; ---------------------
 ;; Verifica se o bloco-e se encaixa horizontalmente à esquerda do bloco-d
@@ -133,29 +135,105 @@
 ;; o terceiro elemento do bloco-e deve ser o mesmo que o first do bloco d
 ;; Exemplo: (encaixa-h? '(0 0 1 1) '(1 1 1 0))
 ;;          > #t
+(define (encaixa-h-debug? bloco-e bloco-d) 
+	(display "\n encaixa h ")
+	(display bloco-e)
+	(display ", ")
+	(display (bin-dec bloco-e))
+	(display " - ")
+	(display bloco-d)
+	(display ", ")
+	(display (bin-dec bloco-d))
+	(display " - Result  ")
+	(display (equal? (first (rest (rest bloco-e))) (first bloco-d)))
+	#t
+	
+)
 (define (encaixa-h? bloco-e bloco-d) 
+
 	(if (or  (empty? bloco-e) (empty? bloco-d)) 
 		#f 
 		(equal? (first (rest (rest bloco-e))) (first bloco-d))
-	)
+		)
+	
 )
-
 
 ;; Bloco Bloco -> Lógico
 ;; ---------------------
 ;; Verifica se o bloco-t se encaixa verticalmente acima do bloco-b
-;; 3  = '(0 0 1 X)
 ;; 14 = '(1 X 1 0)
+;; 3  = '(0 0 1 X)
 ;; o último do bloco-t deve ser o mesmo que o segundo do bloco b
-;; Exemplo: (encaixa-v? '(0 0 1 1) '(1 1 1 0))
+;; Exemplo: (encaixa-v?  '(1 1 1 0) '(0 0 1 1) )
 ;;          > #t
+(define (encaixa-v-debug? bloco-t bloco-b)
+	(display "\n encaixa V ")
+	(display bloco-t)
+	(display ", ")
+	(display (bin-dec bloco-t))
+	(display " - ")
+	(display bloco-b)
+	(display ", ")
+	(display (bin-dec bloco-b))
+	(display " - Result  ")
+	(display (equal? (first (rest bloco-t)) (last bloco-b)))
+	
+	
+)
 (define (encaixa-v? bloco-t bloco-b)
 	(if (or  (empty? bloco-t) (empty? bloco-b)) 
 		#f 
-		(equal? (last bloco-t) (first (rest bloco-b)))
+		(equal? (first (rest bloco-t)) (last bloco-b))
+		)
+)
+;; Bloco decimal Tamanho -> Lógico
+;; -----------------------------
+;; Verifica se um bloco esta em conflito com os
+;; limites superior, inferior, direito e esquerdo 
+(define (seguro-bordas?  bloco index tam)
+	;(display "\n\n \n bloco ")
+	;(display bloco)
+	;(display " index ")
+	;(display index )
+	;(display " tam ")
+	;(display tam )
+	(define (seguro-borda-top? bloco index tam)
+		(if (<= index (tamanho-largura tam))
+			(zero? (last bloco))
+			#t
+			)
+		)
+	(define (seguro-borda-bottom? bloco index tam)
+		(if (> index (* (tamanho-largura tam) (- (tamanho-altura tam) 1)))
+			(zero? (list-ref bloco 1))
+			#t
+			)
+		)
+	(define (seguro-borda-dir? bloco index tam)
+		(if (zero? (remainder index (tamanho-largura tam)))
+			(zero? (list-ref bloco 2))
+			#t
+			)
+		)
+	(define (seguro-borda-esq? bloco index tam)
+		(if (equal? 1 (remainder index (tamanho-largura tam)))
+			(zero? (first bloco))
+			#t
+			)
+		)
+	(if (or (empty? bloco) (empty? tam))
+		#f
+		(and  
+			(seguro-borda-top?  bloco index tam)
+			(seguro-borda-bottom?  bloco index tam)
+			(seguro-borda-dir?  bloco index tam)
+			(seguro-borda-esq?  bloco index tam)
+		)
+
 	)
 )
 
+;;--PENDENTE
 ;; Bloco List Tamanho -> Lógico
 ;; -----------------------------
 ;; Verifica se um bloco é seguro de ser adicionado a uma solução. Ser 
@@ -164,7 +242,7 @@
 ;; inserido. Uma solução é uma lista de blocos que representa a solução 
 ;; do jogo até o presente momento. Para facilitar a implementação, 
 ;; considere que a solução será construída em ordem invertida. Assim, a 
-;; solução '(9 7 12 14 6), referente ao um jogo de tamanho 4x3, 
+;; solução '(6 14 12 7 9), referente ao um jogo de tamanho 4x3, 
 ;; representa a seguinte situação:
 ;; 
 ;; [6][14][12]    [┏][┳][┓]
@@ -172,7 +250,7 @@
 ;; [ ][  ][  ]    [ ][ ][ ]
 ;; [ ][  ][  ]    [ ][ ][ ]
 ;; 
-;; A chamada (seguro? 5 '(9 7 12 14 6) (tamanho 4 3)) deve verificar se 
+;; A chamada (seguro? 5 '(6 14 12 7 9) (tamanho 4 3)) deve verificar se 
 ;; o bloco 5 [┃] é seguro de ser adicionado à solução, isto é, inserido 
 ;; na posição lin=2, col=3 da situação descrita acima. Observe que para 
 ;; este exemplo o bloco 5 é seguro, pois ele se encaixa a todos os 
@@ -180,53 +258,99 @@
 ;; borda direita (branco) do tabuleiro. Veja que não houve necessidade 
 ;; de se verificar o encaixe com o bloco abaixo, já que o mesmo ainda 
 ;; não existe na solução.
-(define (seguro? bloco solucao tam) #f)
+(define (seguro? numero solucao tam) 
+	(and 
+		(seguro-bordas? (dec-bin numero) (add1 (length solucao)) tam)
 
+		(if (and (not (empty? solucao)) (> (length solucao)(tamanho-largura tam)))
+			(encaixa-v? 
+				(dec-bin (list-ref solucao (- (length solucao) (tamanho-largura tam))))
+				(dec-bin numero))
+			#t
+		)
+		(if (and (not (empty? solucao)) (not (equal? 1 (remainder (length solucao) (tamanho-largura tam)))))
+			(encaixa-h? 
+				(dec-bin (list-ref solucao (sub1 (length solucao))))
+				(dec-bin numero))
+			#t
+		)
+		)
+)
+;(seguro? 9 (list 6 14 12 7 9 5) (tamanho 4 3))
+;(seguro? 10 (list 6 14 12 7 9 5) (tamanho 4 3))
+;(seguro? 11 (list 6 14 12 7 9 5) (tamanho 4 3))
+;(seguro? 12 (list 6 14 12 7 9 5) (tamanho 4 3))
+;(seguro? 2 (list 6 14 12 7 9 5) (tamanho 4 3))
+;(seguro? 4 (list 6 14 12 7 9 5) (tamanho 4 3))
+;
+;
+;
+;(seguro? 1 (list 6 14 12 7 9 5) (tamanho 4 3))
+;(seguro? 3 (list 6 14 12 7 9 5) (tamanho 4 3))
+;(seguro? 5 (list 6 14 12 7 9 5) (tamanho 4 3))
+;(seguro? 7 (list 6 14 12 7 9 5) (tamanho 4 3))
+
+(seguro? 1 empty (tamanho 4 3))
+(seguro? 5 empty (tamanho 4 3))
+(seguro? 8 empty (tamanho 4 3))
+(seguro? 10 empty (tamanho 4 3))
+(seguro? 11 empty (tamanho 4 3))
+(seguro? 12 empty (tamanho 4 3))
+(seguro? 13 empty (tamanho 4 3))
+(seguro? 14 empty (tamanho 4 3))
+(seguro? 15 empty (tamanho 4 3))
+
+(seguro? 2 empty (tamanho 4 3))
+(seguro? 4 empty (tamanho 4 3))
+(seguro? 6 empty (tamanho 4 3))
 
 (define (caracter-numero char)
 	(define (core lista char count)
 		(cond
 			((empty? lista) #f)
 			(else (if (equal? (first lista) char) 
-				   count
-				   (core (rest lista) char (add1 count))
-				   )
+				count
+				(core (rest lista) char (add1 count))
+				)
 			)
-				
+
+			)
 		)
-	)
 	(core blocos-reps char 0)
-)
-(define (listachar-listanum lista)
-	(define (core listachar listanum)
-		(cond
-			((empty? listachar) listanum)
-			(else (core (rest listachar) (cons listanum (caracter-numero (first listachar)))))
-		)
-
 	)
-
-	(core lista empty)
-)
+(define (listachar-listanum lista-char)
+	(foldr (lambda (el construido)
+		(cons  (caracter-numero el) construido)
+		) empty lista-char
+	)
+	)
 (define (numero-caracter num)
-		(cond
-			((empty? num) #f)
-			(else (list-ref blocos-reps num))
-)
+	(cond
+		((empty? num) #f)
+		(else (list-ref blocos-reps num))
 		)
-
-;; Lista de caracteres -> lista de números
-;; Converte a lista de caracteres para lista de numeros
+	)
+;; Lista bidimensional -> Lista unidimensional
+;; Converte lista bidimensional em uma lista unidimensional
+;; Exemplo: (listabi-listauni  (list (list 1 2 3) (list 4 5 6))
+;;          > (list 1 2 3 4 5 6)
+(define (listabi-listauni listabi)
+	(foldr 
+		(lambda (lista result) 
+			(append lista result )
+			) empty listabi)
+	)
+;; Lista de caracteres -> (list qdeLinhas qdeColunas lista de números)
+;; Converte a lista de caracteres para lista com qdeLinhas, qdeColunas e lista de numeros
 ;; Exemplo: (converter-arquivo-numero  (list "┗┃┳┓" "┫┻┣┃" "┃┫┣┣" "┏┫┃┗") )
-;;          > (list (0 6 6 1) (12 15 15 6) (1 10 10 0) (0 2 1 0))
+;;          > (list 4 4(list (3 5 14 12) (13 11 7 5) (5 13 7 7) (6 13 5 3)))
 (define (converter-arquivo-numero lista-arquivo)
-	(define (core lista-arquivo lista-retorno)
-		(cond
-			((empty? lista-arquivo) lista-retorno)
-			(else (core (rest lista-arquivo) (cons lista-retorno (listachar-listanum  (string->list(first lista-arquivo))))))
-			)
+	(list
+		(tamanho (length lista-arquivo) (string-length (first lista-arquivo)))
+		(map (lambda (lista) 
+			(listachar-listanum (string->list lista)))
+		lista-arquivo)
 		)
-	(core lista-arquivo empty)
 	)
 
 ;;string->list 
@@ -238,14 +362,11 @@
 (define (abrir-arquivo diretorio)
 	(cond 
 		((empty? diretorio) #f)
-		(else  (converter-arquivo-numero (port->lines (open-input-file diretorio)))
+		(else  (converter-arquivo-numero (port->lines (open-input-file diretorio))))
 		)
-	))
+	)
 
-(abrir-arquivo "../testes/casos/05.txt")
-
-
-
+;;--PENDENTE
 ;; String -> Jogo
 ;; Faz a leitura e processa um jogo armazenado em arquivo.
 ;; Exemplo: (ler-jogo "testes/5.txt")
@@ -261,10 +382,25 @@
 ;;            ┣┳┫┃
 ;;            ┃┣┻┫
 ;;            ┗┻━┛
-(define (escrever-jogo jogo) void)
+(define (escrever-jogo lista) 
+	(display 
+		(foldr 
+			(lambda (el result) 
+				(string-append  
+					(list->string (map numero-caracter el))		
+					"\n"	
+					result
+					)
+				)
+			"" lista
+			)
+		)
+	)
+;;(escrever-jogo (last (abrir-arquivo "../testes/casos/aleatorio_10x10_tudo.txt")))
+
 ;; Dica: procure pelas funções pré-definidas list->string e string-join
 
-
+;;--PENDENTE
 ;; Jogo -> Jogo || #f
 ;; Resolve o jogo Infinity e o retorna resolvido. Caso não seja possível
 ;; resolvê-lo, retorna o valor falso. Por exemplo, se passado o seguinte jogo:
