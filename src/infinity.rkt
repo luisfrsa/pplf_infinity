@@ -32,17 +32,17 @@
 (struct tamanho (altura largura) #:transparent)
 
 ;;iter professor para o run:
-
-(define (iter solucao possibilidades)
-	(cond
-		[(empty? possibilidades) solucao]
-		[(empty? candidatos) #f]
-		[(seguro? candidato solucao tam)
-		(or (iter (adiciona candidato solucao) (remove candidatos possibilidades))
-			(iter solucao (exclui candidato possibilidades)))]
-		[else (iter solucao (exclui candidato possibilidades))]
-		))
-
+;;
+;;(define (iter solucao possibilidades)
+;;	(cond
+;;		[(empty? possibilidades) solucao]
+;;		[(empty? candidatos) #f]
+;;		[(seguro? candidato solucao tam)
+;;		(or (iter (adiciona candidato solucao) (remove candidatos possibilidades))
+;;			(iter solucao (exclui candidato possibilidades)))]
+;;		[else (iter solucao (exclui candidato possibilidades))]
+;;		))
+;;
 ;; Lista -> Lista
 ;; --------------
 ;; Retorna lista de possibilidades de rotações
@@ -50,13 +50,6 @@
 ;;          > (list 0 1 1 0) (list (list 1 1 0 0) (list  1 0 0 1) )
 (define (get-lista-rotacoes lista) resolver) 
 
-;; Lista -> Lista
-;; --------------
-;; Rotaciona um bloco 90 graus em sentido horário
-;; Exemplo: (rotacionar (list 0 1 1 0))
-;;          > (list 1 1 0 0)
-(define (rotacionar lista) 
-	(append (rest lista) (list (first lista))))
 
 ;; Decimal -> Lista binária
 ;; --------------
@@ -96,21 +89,70 @@
     (core lista 0 8)
     )
 
+
+;; Lista -> Lista
+;; --------------
+;; Rotaciona um bloco 90 graus em sentido horário
+;; Exemplo: (rotacionar (list 0 1 1 0))
+;;          > (list 1 1 0 0)
+(define (rotacionar lista) 
+	(append (rest lista) (list (first lista))))
+
+
+;; Lista binária -> Lista de listas binárias de roações
+;; --------------
+;; Converte uma lista binária em uma lista de listas binárias, 
+;;sendo essas, suas possíveis rotações
+;; Exemplo: (gera-rotacoes (list 1 1 0 0))
+;;          > '(list (list 1 1 0 0) (list 1 0 0 1) (list 0 0 1 1) (list 0 1 1 0))
+
+(define (gera-rotacoes lista)
+	(define (core lista primeiro return)
+		(cond
+			[(empty? lista) return]
+			[else 
+				(if (equal? primeiro lista) 
+					  return 
+					  (core (rotacionar lista) 
+			    	  (if (empty? primeiro) lista primeiro) 
+			    	  (cons (rotacionar lista) return)
+			    	  )
+			     )
+			]
+		)
+	)
+	(core lista empty empty)
+)
 ;; Bloco Bloco -> Lógico
 ;; ---------------------
 ;; Verifica se o bloco-e se encaixa horizontalmente à esquerda do bloco-d
-;; Exemplo: (encaixa-h? 7 9)
+;; 14 = '(X 1 1 0)
+;; 3  = '(0 0 X 1)
+;; o first do bloco-e deve ser o mesmo que o terceiro elemento do bloco d
+;; Exemplo: (encaixa-h? 14 3)
 ;;          > #t
-(define (encaixa-h? bloco-e bloco-d) #f)
+(define (encaixa-h? bloco-e bloco-d) 
+	(if (or  (empty? bloco-e) (empty? bloco-d)) 
+		#f 
+		(equal? (first bloco-e) (first (rest (rest bloco-d))))
+	)
+)
 
 
 ;; Bloco Bloco -> Lógico
 ;; ---------------------
 ;; Verifica se o bloco-t se encaixa verticalmente acima do bloco-b
-;; Exemplo: (encaixa-v? 14 11)
+;; 14 = '(1 X 1 0)
+;; 3  = '(0 0 1 X)
+;; o segundo do bloco-t deve ser o mesmo que o último do bloco b
+;; Exemplo: (encaixa-v? 14 3)
 ;;          > #t
-(define (encaixa-v? bloco-t bloco-b) #f)
-
+(define (encaixa-v? bloco-t bloco-b)
+	(if (or  (empty? bloco-t) (empty? bloco-b)) 
+		#f 
+		(equal? (first (rest bloco-t)) (last bloco-b))
+	)
+)
 
 ;; Bloco List Tamanho -> Lógico
 ;; -----------------------------
