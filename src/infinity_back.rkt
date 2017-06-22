@@ -303,16 +303,16 @@
 	;(display "  ")
 	;(display (equal? 1 (remainder (add1(length solucao)) (tamanho-largura tam))))
 	(and 
-		(seguro-bordas? (dec-bin numero) (add1 (length solucao)) tam)
+		(seguro-bordas-debug? (dec-bin numero) (add1 (length solucao)) tam)
 
 		(if (and (not (empty? solucao)) (> (length solucao)(tamanho-largura tam)))
-			(encaixa-v? 
+			(encaixa-v-debug? 
 				(dec-bin (list-ref solucao (- (length solucao) (tamanho-largura tam))))
 				(dec-bin numero))
 			#t
 		)
 		(if (and (not (empty? solucao)) (not (equal? 1 (remainder (add1(length solucao)) (tamanho-largura tam)))))
-			(encaixa-h? 
+			(encaixa-h-debug? 
 				(dec-bin (list-ref solucao (sub1 (length solucao))))
 				(dec-bin numero))
 			#t
@@ -502,6 +502,7 @@
 ;;   (0  1  1 0))         [ ][╹][╹][ ]
 
 
+(define (resolver jogo) #f)
 
 (define (bilist-unilist lista)
   (if (empty? lista)
@@ -511,37 +512,30 @@
  )
 
 
-(define (resolver lido)
+(define (resolve lido)
 	(define (rotate-seguro solucao pendentes tamanho list-rotacoes)
 
+		;(display "seguro ")
+		;(display (first list-rotacoes))
 		(cond
-			;;caso não haja resolução retorna (list false)
-			((empty? list-rotacoes) (list #f)) 
-			;;caso o jogo seja resolvido retorna (list true resolucao tamanho)
-			((seguro? (bin-dec (first list-rotacoes)) solucao tamanho)  
-				(if (first (core (if (empty? solucao) (list (bin-dec (first list-rotacoes))) (append solucao (list (bin-dec (first list-rotacoes))))) (drop-right pendentes 1)  tamanho))
-					(list #t solucao tamanho)	
-					(rotate-seguro solucao pendentes tamanho (rest list-rotacoes) )
-				)
+			((empty? list-rotacoes) (list #f)) ;;caso não haja resolução retorna (list false)
+			((seguro? (bin-dec (first list-rotacoes)) solucao tamanho)  ;;caso o jogo seja resolvido retorna (list true resolucao tamanho)
+				(core (if (empty? solucao) (list (bin-dec (first list-rotacoes))) (append solucao (list (bin-dec (first list-rotacoes))))) (drop-right pendentes 1)  tamanho) 
 			)
 			(else (rotate-seguro solucao pendentes tamanho (rest list-rotacoes)))
 		)
-	)
-	(define (exibe-solucao solucao )
-		(escrever-jogo-resolvido solucao)
-		solucao
 	)
 	(define (core solucao pendentes tamanho)
 		;(display solucao)
 		;(display pendentes)
 		;(display tamanho)
-
+		(escrever-jogo-resolvido (list #t solucao tamanho))
 		(cond 
-			((empty? pendentes) (exibe-solucao(list #t solucao tamanho)))
-			((rotate-seguro solucao pendentes tamanho (gera-rotacoes (dec-bin(last pendentes)))) )
+			((empty? pendentes) (list #t solucao tamanho))
+			((rotate-seguro solucao pendentes tamanho (gera-rotacoes (dec-bin(last pendentes)))))
 		)
 	)
-	(core  empty (bilist-unilist(last lido)) (first lido))
+	 (core  empty (bilist-unilist(last lido)) (first lido))
 
 )
 
@@ -564,7 +558,18 @@
 ;;eof-object?
 
 (define (main args)
-	(resolver (ler-jogo args))
+	(define (exibe-resolvido resolucao)
+		
+		(if (equal? (first resolucao) #t) 
+			(escrever-jogo-resolvido resolucao)
+			#f
+		)
+	)
+	(define (JAJA retorno-lido)
+		;(display (escrever-jogo (last retorno-lido)))
+		(exibe-resolvido (resolve retorno-lido))
+	)
+	(JAJA (ler-jogo args))
 
 )
 ;(main "../testes/casos/01.txt")
@@ -572,10 +577,10 @@
 ;(main "../testes/casos/03.txt")
 ;(main "../testes/casos/04.txt")
 ;(main "../testes/casos/05.txt")
+;(main "../testes/casos/teste.txt")
 ;(main "../testes/casos/06.txt")
 ;(main "../testes/casos/07.txt")
-;(main "../testes/casos/08.txt")
-;(main "../testes/casos/erro.txt")
+(main "../testes/casos/08.txt")
 ;(main "../testes/casos/09.txt")
 ;(main "../testes/casos/10.txt")
 ;(main "../testes/casos/11.txt")
@@ -587,10 +592,10 @@
 ;(main "../testes/casos/17.txt")
 ;(main "../testes/casos/18.txt")
 ;(main "../testes/casos/19.txt")
-(main "../testes/casos/20.txt")
-(main "../testes/casos/aleatorio_10x10_curvas.txt")
-(main "../testes/casos/aleatorio_10x10_tudo.txt")
-(main "../testes/casos/aleatorio_30x30_curvas.txt")
-(main "../testes/casos/aleatorio_30x30_tudo.txt")
-(main "../testes/casos/aleatorio_50x50_curvas.txt")
-(main "../testes/casos/aleatorio_50x50_tudo.txt")
+;(main "../testes/casos/20.txt")
+;(main "../testes/casos/aleatorio_10x10_curvas.txt")
+;(main "../testes/casos/aleatorio_10x10_tudo.txt")
+;(main "../testes/casos/aleatorio_30x30_curvas.txt")
+;(main "../testes/casos/aleatorio_30x30_tudo.txt")
+;(main "../testes/casos/aleatorio_50x50_curvas.txt")
+;(main "../testes/casos/aleatorio_50x50_tudo.txt")

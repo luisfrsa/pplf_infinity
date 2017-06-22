@@ -14,6 +14,7 @@
 
 (require rackunit/text-ui rackunit "infinity.rkt")
 
+
 (define test-suite-infinity
   (test-suite
    "Infinity"
@@ -27,52 +28,53 @@
    "Função: rotacionar"
    (test-case
     "Rotação de todos os blocos"
-    (check-equal? (map rotacionar (range 16))
-                  '(0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15)))))
+
+    (check-equal? (map rotacionar (map dec-bin (range 16)))
+                  (map dec-bin '(0 2 4 6 8 10 12 14 1 3 5 7 9 11 13 15))))))
 
 (define test-suite-encaixa-h?
   (test-suite
    "Função: encaixa-h?"
    (test-case
     "Encaixe horizontal 0/0 -> [ ][ ]"
-    (check-true (encaixa-h? 0 0)))
+    (check-true (encaixa-h? (dec-bin 0) (dec-bin 0))))
    (test-case
     "Encaixe horizontal 0/6 -> [ ][┏]"
-    (check-true (encaixa-h? 0 6)))
+    (check-true (encaixa-h? (dec-bin 0) (dec-bin 6))))
    (test-case
     "Não-encaixe horizontal 6/0 -> [┏][ ]"
-    (check-false (encaixa-h? 6 0)))
+    (check-false (encaixa-h? (dec-bin 6) (dec-bin 0))))
    (test-case
     "Encaixe horizontal 6/9 -> [┏][┛]"
-    (check-true (encaixa-h? 6 9)))
+    (check-true (encaixa-h? (dec-bin 6) (dec-bin 9))))
    (test-case
     "Encaixe horizontal 9/6 -> [┛][┏]"
-    (check-true (encaixa-h? 9 6)))
+    (check-true (encaixa-h? (dec-bin 9) (dec-bin 6))))
    (test-case
     "Não-encaixe horizontal 6/6 -> [┏][┏]"
-    (check-false (encaixa-h? 6 6)))))
+    (check-false (encaixa-h? (dec-bin 6) (dec-bin 6))))))
 
 (define test-suite-encaixa-v?
   (test-suite
    "Função: encaixa-v?"
    (test-case
     "Encaixe vertical 0/0 -> [ ][ ]"
-    (check-true (encaixa-v? 0 0)))
+    (check-true (encaixa-v? (dec-bin 0) (dec-bin 0))))
    (test-case
     "Encaixe vertical 0/6 -> [ ][┏]"
-    (check-true (encaixa-v? 0 6)))
+    (check-true (encaixa-v? (dec-bin 0) (dec-bin 6))))
    (test-case
     "Não-encaixe vertical 6/0 -> [┏][ ]"
-    (check-false (encaixa-v? 6 0)))
+    (check-false (encaixa-v? (dec-bin 6) (dec-bin 0))))
    (test-case
     "Encaixe vertical 6/9 -> [┏][┛]"
-    (check-true (encaixa-v? 6 9)))
+    (check-true (encaixa-v? (dec-bin 6) (dec-bin 9))))
    (test-case
     "Encaixe vertical 9/6 -> [┛][┏]"
-    (check-true (encaixa-v? 9 6)))
+    (check-true (encaixa-v? (dec-bin 9) (dec-bin 6))))
    (test-case
     "Não-encaixe vertical 6/6 -> [┏][┏]"
-    (check-false (encaixa-v? 6 6)))))
+    (check-false (encaixa-v? (dec-bin 6) (dec-bin 6))))))
 
 (define test-suite-seguro?
   (test-suite
@@ -85,22 +87,22 @@
     (check-true (seguro? 14 '(6) (tamanho 4 3))))
    (test-case
     "Seguro no canto superior direito"
-    (check-true (seguro? 12 '(14 6) (tamanho 4 3))))
+    (check-true (seguro? 12 '(6 14) (tamanho 4 3))))
    (test-case
     "Seguro na borda direita"
-    (check-true (seguro? 5 '(9 7 12 14 6) (tamanho 4 3))))
+    (check-true (seguro? 5 '(6 14 12 7 9) (tamanho 4 3))))
    (test-case
     "Seguro no canto inferior direito"
-    (check-true (seguro? 9 '(11 3 13 14 7 5 9 7 12 14 6) (tamanho 4 3))))
+    (check-true (seguro? 9 '(6 14 12 7 9 5 7 14 13 3 11) (tamanho 4 3))))
    (test-case
     "Seguro na borda inferior"
-    (check-true (seguro? 11 '(3 13 14 7 5 9 7 12 14 6) (tamanho 4 3))))
+    (check-true (seguro? 11 '(6 14 12 7 9 5 7 14 13 3) (tamanho 4 3))))
    (test-case
     "Seguro no canto inferior esquerdo"
-    (check-true (seguro? 3 '(13 14 7 5 9 7 12 14 6) (tamanho 4 3))))
+    (check-true (seguro? 3 '(6 14 12 7 9 5 7 14 13) (tamanho 4 3))))
    (test-case
     "Seguro no interior"
-    (check-true (seguro? 14 '(7 5 9 7 12 14 6) (tamanho 4 3))))
+    (check-true (seguro? 14 '(6 14 12 7 9 5 7) (tamanho 4 3))))
    (test-case
     "Inseguro no canto superior esquerdo"
     (check-false (seguro? 9 '() (tamanho 4 3))))
@@ -109,22 +111,22 @@
     (check-false (seguro? 11 '(6) (tamanho 4 3))))
    (test-case
     "Inseguro no canto superior direito"
-    (check-false (seguro? 15 '(14 6) (tamanho 4 3))))
+    (check-false (seguro? 15 '(6 14) (tamanho 4 3))))
    (test-case
     "Inseguro na borda direita"
-    (check-false (seguro? 7 '(9 7 12 14 6) (tamanho 4 3))))
+    (check-false (seguro? 7 '(6 14 12 7 9) (tamanho 4 3))))
    (test-case
     "Inseguro no canto inferior direito"
-    (check-false (seguro? 15 '(11 3 13 14 7 5 9 7 12 14 6) (tamanho 4 3))))
+    (check-false (seguro? 15 '(6 14 12 7 9 5 7 14 13 3 11) (tamanho 4 3))))
    (test-case
     "Inseguro na borda inferior"
-    (check-false (seguro? 13 '(3 13 14 7 5 9 7 12 14 6) (tamanho 4 3))))
+    (check-false (seguro? 13 '(6 14 12 7 9 5 7 14 13 3) (tamanho 4 3))))
    (test-case
     "Inseguro no canto inferior esquerdo"
-    (check-false (seguro? 13 '(13 14 7 5 9 7 12 14 6) (tamanho 4 3))))
+    (check-false (seguro? 13 '(6 14 12 7 9 5 7 14 13) (tamanho 4 3))))
    (test-case
     "Inseguro no interior"
-    (check-false (seguro? 0 '(7 5 9 7 12 14 6) (tamanho 4 3))))
+    (check-false (seguro? 0 '(6 14 12 7 9 5 7) (tamanho 4 3))))
    (test-case
     "Seguro no canto superior/inferior esquerdo"
     (check-true (seguro? 2 '() (tamanho 1 3))))
@@ -133,10 +135,25 @@
     (check-true (seguro? 10 '(2) (tamanho 1 3))))
    (test-case
     "Seguro no canto superior/inferior direito"
-    (check-true (seguro? 8 '(10 2) (tamanho 1 3))))))
+    (check-true (seguro? 8 '(2 10) (tamanho 1 3))))))
+
 
 (define (executar-testes)
   (run-tests test-suite-infinity)
   (void))
 
 (executar-testes)
+
+;;7 5 9 
+;;7 12 14
+;;6 (14)
+;;
+;; '(6 14 12 7 9 5 7) 0
+;;6 14 12
+;;7 9 5 
+;;7 0
+;;
+;;
+;;      1001
+;;0111  0000
+
