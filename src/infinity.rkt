@@ -101,9 +101,11 @@
 ;; Rotaciona um bloco 90 graus em sentido horário
 ;; Exemplo: (rotacionar (list 0 1 1 0))
 ;;          > (list 1 1 0 0)
-(define (rotacionar lista) 
+(define (rotacionar2 lista) 
 	(append (rest lista) (list (first lista))))
 
+(define (rotacionar lista) 
+	(append (list(last lista)) (drop-right lista 1)))
 
 ;; Lista binária -> Lista de listas binárias de roações
 ;; --------------
@@ -532,10 +534,8 @@
 		solucao
 	)
 	(define (core solucao pendentes tamanho)
-		;(display solucao)
-		;(display pendentes)
-		;(display tamanho)
 
+		;(escrever-jogo-resolvido (list #t solucao tamanho))
 		(cond 
 			((empty? pendentes) (exibe-solucao(list #t solucao tamanho)))
 			((rotate-seguro solucao pendentes tamanho (gera-rotacoes (dec-bin(last pendentes)))) )
@@ -587,10 +587,10 @@
 ;(main "../testes/casos/17.txt")
 ;(main "../testes/casos/18.txt")
 ;(main "../testes/casos/19.txt")
-(main "../testes/casos/20.txt")
-(main "../testes/casos/aleatorio_10x10_curvas.txt")
-(main "../testes/casos/aleatorio_10x10_tudo.txt")
-(main "../testes/casos/aleatorio_30x30_curvas.txt")
-(main "../testes/casos/aleatorio_30x30_tudo.txt")
+;(main "../testes/casos/20.txt")
+;(main "../testes/casos/aleatorio_10x10_curvas.txt")
+;(main "../testes/casos/aleatorio_10x10_tudo.txt")
+;(main "../testes/casos/aleatorio_30x30_curvas.txt")
+;(main "../testes/casos/aleatorio_30x30_tudo.txt")
 (main "../testes/casos/aleatorio_50x50_curvas.txt")
-(main "../testes/casos/aleatorio_50x50_tudo.txt")
+;main "../testes/casos/aleatorio_50x50_tudo.txt")
