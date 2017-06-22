@@ -33,6 +33,7 @@
 ;;    largura : Número - quantidade de colunas do jogo.
 (struct tamanho (altura largura) #:transparent)
 
+
 ;;iter professor para o run:
 ;;
 ;;(define (iter solucao possibilidades)
@@ -233,7 +234,7 @@
 	)
 )
 
-;;--PENDENTE
+
 ;; Bloco List Tamanho -> Lógico
 ;; -----------------------------
 ;; Verifica se um bloco é seguro de ser adicionado a uma solução. Ser 
@@ -289,21 +290,21 @@
 ;(seguro? 3 (list 6 14 12 7 9 5) (tamanho 4 3))
 ;(seguro? 5 (list 6 14 12 7 9 5) (tamanho 4 3))
 ;(seguro? 7 (list 6 14 12 7 9 5) (tamanho 4 3))
-
-(seguro? 1 empty (tamanho 4 3))
-(seguro? 5 empty (tamanho 4 3))
-(seguro? 8 empty (tamanho 4 3))
-(seguro? 10 empty (tamanho 4 3))
-(seguro? 11 empty (tamanho 4 3))
-(seguro? 12 empty (tamanho 4 3))
-(seguro? 13 empty (tamanho 4 3))
-(seguro? 14 empty (tamanho 4 3))
-(seguro? 15 empty (tamanho 4 3))
-
-(seguro? 2 empty (tamanho 4 3))
-(seguro? 4 empty (tamanho 4 3))
-(seguro? 6 empty (tamanho 4 3))
-
+;
+;(seguro? 1 empty (tamanho 4 3))
+;(seguro? 5 empty (tamanho 4 3))
+;(seguro? 8 empty (tamanho 4 3))
+;(seguro? 10 empty (tamanho 4 3))
+;(seguro? 11 empty (tamanho 4 3))
+;(seguro? 12 empty (tamanho 4 3))
+;(seguro? 13 empty (tamanho 4 3))
+;(seguro? 14 empty (tamanho 4 3))
+;(seguro? 15 empty (tamanho 4 3))
+;
+;(seguro? 2 empty (tamanho 4 3))
+;(seguro? 4 empty (tamanho 4 3))
+;(seguro? 6 empty (tamanho 4 3))
+;
 (define (caracter-numero char)
 	(define (core lista char count)
 		(cond
@@ -358,20 +359,25 @@
 ;; String(direotrio) -> ????
 ;; Faz leitura do diretorio do arquivo passado por parametro
 ;; Exemplo: (ler-jogo "testes/5.txt")
-;;          > ????
-(define (abrir-arquivo diretorio)
-	(cond 
-		((empty? diretorio) #f)
-		(else  (converter-arquivo-numero (port->lines (open-input-file diretorio))))
-		)
-	)
+;;;          > ????
+;(define (abrir-arquivo diretorio)
+;	(cond 
+;		((empty? diretorio) #f)
+;		(else  (converter-arquivo-numero (port->lines (open-input-file diretorio))))
+;		)
+;	)
 
 ;;--PENDENTE
 ;; String -> Jogo
 ;; Faz a leitura e processa um jogo armazenado em arquivo.
 ;; Exemplo: (ler-jogo "testes/5.txt")
 ;;          > '((0 6 6 1) (12 15 15 6) (1 10 10 0) (0 2 1 0))
-(define (ler-jogo arquivo) '())
+(define (ler-jogo diretorio)
+	(cond 
+		((empty? diretorio) #f)
+		(else  (converter-arquivo-numero (port->lines (open-input-file diretorio))))
+		)
+	)
 ;; Dica: procure pelas funções pré-definidas open-input-file e port->lines
 
 
@@ -396,7 +402,7 @@
 			)
 		)
 	)
-;;(escrever-jogo (last (abrir-arquivo "../testes/casos/aleatorio_10x10_tudo.txt")))
+;;(escrever-jogo (last (ler-jogo "../testes/casos/aleatorio_10x10_tudo.txt")))
 
 ;; Dica: procure pelas funções pré-definidas list->string e string-join
 
@@ -436,4 +442,20 @@
 ;;eof-object?
 
 (define (main args)
-	(display args))
+	(define (JAJA retorno-lido)
+		(display "Tabuleiro lido: \n")
+		(display (escrever-jogo (last retorno-lido)))
+		(display "\n")
+
+		(display "Tabuleiro resolvido: \n")
+		(display (escrever-jogo (last retorno-lido)))
+		(display "\n")
+
+	)
+	(display "Lendo arquivo... \n")
+	(JAJA (ler-jogo args))
+   ;;(escrever-jogo (last (ler-jogo "../testes/casos/aleatorio_10x10_tudo.txt")))
+
+)
+(main "../testes/casos/aleatorio_10x10_tudo.txt")
+
