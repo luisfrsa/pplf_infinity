@@ -28,25 +28,12 @@
 ;; lista com as representações dos blocos como caracteres
 (define blocos-reps (string->list " ╹╺┗╻┃┏┣╸┛━┻┓┫┳╋"))
 
-;;(define blocos-repr (list " " "╹" "╺" "┗" "╻" "┃" "┏" "┣" "╸" "┛" "━" "┻" "┓" "┫" "┳" "╋"))
 
 ;; Tamanho representa o tamanho de um jogo em altura e largura
 ;;     altura : Número - quantidade de linhas do jogo.
 ;;    largura : Número - quantidade de colunas do jogo.
 (struct tamanho (altura largura) #:transparent)
 
-
-;;iter professor para o run:
-;;
-;;(define (iter solucao possibilidades)
-;;	(cond
-;;		[(empty? possibilidades) solucao]
-;;		[(empty? candidatos) #f]
-;;		[(seguro? candidato solucao tam)
-;;		(or (iter (adiciona candidato solucao) (remove candidatos possibilidades))
-;;			(iter solucao (exclui candidato possibilidades)))]
-;;		[else (iter solucao (exclui candidato possibilidades))]
-;;		))
 ;;
 ;; Lista -> Lista
 ;; --------------
@@ -140,6 +127,15 @@
 ;; o terceiro elemento do bloco-e deve ser o mesmo que o first do bloco d
 ;; Exemplo: (encaixa-h? '(0 0 1 1) '(1 1 1 0))
 ;;          > #t
+(define (encaixa-h? bloco-e bloco-d) 
+
+	(if (or  (empty? bloco-e) (empty? bloco-d)) 
+		#f 
+		(equal? (first (rest (rest bloco-e))) (first bloco-d))
+		)
+	
+)
+;Função apenas para debug
 (define (encaixa-h-debug? bloco-e bloco-d) 
 	(display "\n encaixa h ")
 	(display bloco-e)
@@ -157,14 +153,6 @@
 		)
 	
 )
-(define (encaixa-h? bloco-e bloco-d) 
-
-	(if (or  (empty? bloco-e) (empty? bloco-d)) 
-		#f 
-		(equal? (first (rest (rest bloco-e))) (first bloco-d))
-		)
-	
-)
 
 ;; Bloco Bloco -> Lógico
 ;; ---------------------
@@ -174,6 +162,17 @@
 ;; o último do bloco-t deve ser o mesmo que o segundo do bloco b
 ;; Exemplo: (encaixa-v?  '(1 1 1 0) '(0 0 1 1) )
 ;;          > #t
+
+(define (encaixa-v? bloco-t bloco-b)
+	(if (or  (empty? bloco-t) (empty? bloco-b)) 
+		#f 
+		(equal? (first (rest bloco-t)) (last bloco-b))
+		)
+)
+
+
+;Função apenas para teste
+
 (define (encaixa-v-debug? bloco-t bloco-b)
 	(display "\n encaixa V ")
 	(display bloco-t)
@@ -190,16 +189,13 @@
 		(equal? (first (rest bloco-t)) (last bloco-b))
 		)
 )
-(define (encaixa-v? bloco-t bloco-b)
-	(if (or  (empty? bloco-t) (empty? bloco-b)) 
-		#f 
-		(equal? (first (rest bloco-t)) (last bloco-b))
-		)
-)
+
+
 ;; Bloco decimal Tamanho -> Lógico
 ;; -----------------------------
 ;; Verifica se um bloco esta em conflito com os
 ;; limites superior, inferior, direito e esquerdo 
+
 (define (seguro-bordas?  bloco index tam )
 	(define (seguro-borda-top? bloco index tam)
 		(if (<= index (tamanho-largura tam))
@@ -236,6 +232,8 @@
 
 	)
 )
+
+;Função apenas para teste
 (define (seguro-bordas-debug?  bloco index tam)
 	(display "\n\n \n bloco ")(display bloco)(display "#")(display (bin-dec bloco))(display " index ")(display index )(display " tam ")(display tam )
 	(define (seguro-borda-top? bloco index tam)
@@ -322,34 +320,21 @@
 		)
 )
 
-;(seguro? 9 (list 6 14 12 7 9 5) (tamanho 4 3))
-;(seguro? 10 (list 6 14 12 7 9 5) (tamanho 4 3))
-;(seguro? 11 (list 6 14 12 7 9 5) (tamanho 4 3))
-;(seguro? 12 (list 6 14 12 7 9 5) (tamanho 4 3))
-;(seguro? 2 (list 6 14 12 7 9 5) (tamanho 4 3))
-;(seguro? 4 (list 6 14 12 7 9 5) (tamanho 4 3))
-;
-;
-;
-;(seguro? 1 (list 6 14 12 7 9 5) (tamanho 4 3))
-;(seguro? 3 (list 6 14 12 7 9 5) (tamanho 4 3))
-;(seguro? 5 (list 6 14 12 7 9 5) (tamanho 4 3))
-;(seguro? 7 (list 6 14 12 7 9 5) (tamanho 4 3))
-;
-;(seguro? 1 empty (tamanho 4 3))
-;(seguro? 5 empty (tamanho 4 3))
-;(seguro? 8 empty (tamanho 4 3))
-;(seguro? 10 empty (tamanho 4 3))
-;(seguro? 11 empty (tamanho 4 3))
-;(seguro? 12 empty (tamanho 4 3))
-;(seguro? 13 empty (tamanho 4 3))
-;(seguro? 14 empty (tamanho 4 3))
-;(seguro? 15 empty (tamanho 4 3))
-;
-;(seguro? 2 empty (tamanho 4 3))
-;(seguro? 4 empty (tamanho 4 3))
-;(seguro? 6 empty (tamanho 4 3))
-;
+;Lista de Caracteres -> Lista de Números
+;Converte lista de caracteres em lista de números
+;Ex: (listachar-listanum (6 14 12)) -> '(┏  ┳  ┓)
+(define (listachar-listanum lista-char)
+	(foldr (lambda (el construido)
+		(cons  (caracter-numero el) construido)
+		) empty lista-char
+	)
+)
+
+
+
+;Caractere->Número
+;Converte caractere em número
+;Ex: (numero-caracter ┓) -> 12
 (define (caracter-numero char)
 	(define (core lista char count)
 		(cond
@@ -364,18 +349,18 @@
 		)
 	(core blocos-reps char 0)
 	)
-(define (listachar-listanum lista-char)
-	(foldr (lambda (el construido)
-		(cons  (caracter-numero el) construido)
-		) empty lista-char
-	)
-	)
+
+
+;Número->Caractere
+;Converte número em caractere
+;Ex: (numero-caracter 12) -> ┓
 (define (numero-caracter num)
 	(cond
 		((empty? num) #f)
 		(else (list-ref blocos-reps num))
 		)
 	)
+
 ;; Lista bidimensional -> Lista unidimensional
 ;; Converte lista bidimensional em uma lista unidimensional
 ;; Exemplo: (listabi-listauni  (list (list 1 2 3) (list 4 5 6))
@@ -402,20 +387,6 @@
 		)
 	)
 
-;;string->list 
-
-;; String(direotrio) -> ????
-;; Faz leitura do diretorio do arquivo passado por parametro
-;; Exemplo: (ler-jogo "testes/5.txt")
-;;;          > ????
-;(define (abrir-arquivo diretorio)
-;	(cond 
-;		((empty? diretorio) #f)
-;		(else  (converter-arquivo-numero (port->lines (open-input-file diretorio))))
-;		)
-;	)
-
-;;--PENDENTE
 ;; String -> Jogo
 ;; Faz a leitura e processa um jogo armazenado em arquivo.
 ;; Exemplo: (ler-jogo "testes/5.txt")
@@ -450,7 +421,11 @@
 			)
 		)
 )
-
+;; Lista do jogo resolvido -> Tabuleiro'
+;; '(0  6 12 4          [ ][┏][┓][╻]
+;;   6 15 15 9     =>   [┏][╋][╋][┛]
+;;   1  5  5 0          [╹][┃][┃][ ]
+;;   0  1  1 0)         [ ][╹][╹][ ]
 (define (escrever-jogo-resolvido param) 
 	(define (core lista break-point count string quebra-linha)
 		;(display "\n\n lista: ")
@@ -469,24 +444,21 @@
 			(else (core (rest lista) break-point (add1 count) (numero-caracter(first lista)) ""))
 		)
 	)
-	;(core (list-ref param 1) (tamanho-largura (last param)) 1 (first (list-ref param 1)) " ")
 	(core (list-ref param 1) (tamanho-largura (last param)) 1 "\n/*-------------------*/ \n" "")
 )
 
 
+;; (list (list) (list)) -> (list)
+;; Converte lista bidimensional em lista unidimensional.
+;; Exemplo: (list (list 1 2 3) (list 4 5 6))
+;;          > '(1 2 3 4 5 6)
+(define (bilist-unilist lista)
+  (if (empty? lista)
+      empty
+      (append (first lista) (bilist-unilist (rest lista)))
+    )
+ )
 
-	;(display (foldl (lambda (el retorno) (string-append (numero-caracter el) retorno)) " " lista))
-	;(display  
-	;	(foldr (lambda (el res) 
-	;		           ( display(el))
-	;		   ) " " lista
-	;	)
-	;)
-;;(escrever-jogo (last (ler-jogo "../testes/casos/aleatorio_10x10_tudo.txt")))
-
-;; Dica: procure pelas funções pré-definidas list->string e string-join
-
-;;--PENDENTE
 ;; Jogo -> Jogo || #f
 ;; Resolve o jogo Infinity e o retorna resolvido. Caso não seja possível
 ;; resolvê-lo, retorna o valor falso. Por exemplo, se passado o seguinte jogo:
@@ -502,17 +474,6 @@
 ;;   (6 15 15 9)     =>   [┏][╋][╋][┛]
 ;;   (1  5  5 0)          [╹][┃][┃][ ]
 ;;   (0  1  1 0))         [ ][╹][╹][ ]
-
-
-
-(define (bilist-unilist lista)
-  (if (empty? lista)
-      empty
-      (append (first lista) (bilist-unilist (rest lista)))
-    )
- )
-
-
 (define (resolver lido)
 	(define (rotate-seguro solucao pendentes tamanho list-rotacoes)
 
@@ -567,30 +528,30 @@
 	(resolver (ler-jogo args))
 
 )
-;(main "../testes/casos/01.txt")
-;(main "../testes/casos/02.txt")
-;(main "../testes/casos/03.txt")
-;(main "../testes/casos/04.txt")
-;(main "../testes/casos/05.txt")
-;(main "../testes/casos/06.txt")
-;(main "../testes/casos/07.txt")
-;(main "../testes/casos/08.txt")
-;(main "../testes/casos/erro.txt")
-;(main "../testes/casos/09.txt")
-;(main "../testes/casos/10.txt")
-;(main "../testes/casos/11.txt")
-;(main "../testes/casos/12.txt")
-;(main "../testes/casos/13.txt")
-;(main "../testes/casos/14.txt")
-;(main "../testes/casos/15.txt")
-;(main "../testes/casos/16.txt")
-;(main "../testes/casos/17.txt")
-;(main "../testes/casos/18.txt")
-;(main "../testes/casos/19.txt")
-;(main "../testes/casos/20.txt")
-;(main "../testes/casos/aleatorio_10x10_curvas.txt")
-;(main "../testes/casos/aleatorio_10x10_tudo.txt")
-;(main "../testes/casos/aleatorio_30x30_curvas.txt")
-;(main "../testes/casos/aleatorio_30x30_tudo.txt")
-(main "../testes/casos/aleatorio_50x50_curvas.txt")
+(main "../testes/casos/01.txt")
+(main "../testes/casos/02.txt")
+(main "../testes/casos/03.txt")
+(main "../testes/casos/04.txt")
+(main "../testes/casos/05.txt")
+(main "../testes/casos/06.txt")
+(main "../testes/casos/07.txt")
+(main "../testes/casos/08.txt")
+(main "../testes/casos/erro.txt")
+(main "../testes/casos/09.txt")
+(main "../testes/casos/10.txt")
+(main "../testes/casos/11.txt")
+(main "../testes/casos/12.txt")
+(main "../testes/casos/13.txt")
+(main "../testes/casos/14.txt")
+(main "../testes/casos/15.txt")
+(main "../testes/casos/16.txt")
+(main "../testes/casos/17.txt")
+(main "../testes/casos/18.txt")
+(main "../testes/casos/19.txt")
+(main "../testes/casos/20.txt")
+(main "../testes/casos/aleatorio_10x10_curvas.txt")
+(main "../testes/casos/aleatorio_10x10_tudo.txt")
+(main "../testes/casos/aleatorio_30x30_curvas.txt")
+(main "../testes/casos/aleatorio_30x30_tudo.txt")
+;(main "../testes/casos/aleatorio_50x50_curvas.txt")
 ;main "../testes/casos/aleatorio_50x50_tudo.txt")
