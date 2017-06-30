@@ -94,9 +94,6 @@
 (define (rotacionar lista) 
 	(append (list(last lista)) (drop-right lista 1)))
 
-(define (gera-rotacoes-dec num)
-	(gera-rotacoes(dec-bin num))
-)
 ;; Lista binária -> Lista de listas binárias de roações
 ;; --------------
 ;; Converte uma lista binária em uma lista de listas binárias, 
@@ -384,10 +381,10 @@
 		;(foldl (lambda (lista result) 
 		;	(append (listachar-listanum (string->list lista)) result))
 		;	empty lista-arquivo)
-		(bilist-unilist (map (lambda (lista) 
+		(map (lambda (lista) 
 			(listachar-listanum (string->list lista)))
 		lista-arquivo)
-		))
+		)
 	)
 
 ;; String -> Jogo
@@ -403,8 +400,14 @@
 ;; Dica: procure pelas funções pré-definidas open-input-file e port->lines
 
 
-
-(define (escrever-jogo-old lista) 
+;; Jogo -> void
+;; Escreve o jogo na tela codificado em caracteres.
+;; Exemplo: (escrever-jogo '((6 10 14 12) (7 14 13 5) (5 7 11 13) (3 11 10 9)))
+;;          > ┏━┳┓
+;;            ┣┳┫┃
+;;            ┃┣┻┫
+;;            ┗┻━┛
+(define (escrever-jogo lista) 
 	(display 
 		(foldr 
 			(lambda (el result) 
@@ -418,30 +421,30 @@
 			)
 		)
 )
-;; Jogo -> void
-;; Escreve o jogo na tela codificado em caracteres.
-;; Exemplo: (escrever-jogo '(6 10 14 12 7 14 13 5 5 7 11 13 3 11 10 9) (tamanho 4 4))
-;;          > ┏━┳┓
-;;            ┣┳┫┃
-;;            ┃┣┻┫
-;;            ┗┻━┛
 ;; Lista do jogo resolvido -> Tabuleiro'
 ;; '(0  6 12 4          [ ][┏][┓][╻]
 ;;   6 15 15 9     =>   [┏][╋][╋][┛]
 ;;   1  5  5 0          [╹][┃][┃][ ]
 ;;   0  1  1 0)         [ ][╹][╹][ ]
-(define (escrever-jogo resolvido tamanho) 
+(define (escrever-jogo-resolvido param) 
 	(define (core lista break-point count string quebra-linha)
+		;(display "\n\n lista: ")
+		;(display lista)
+		;(display "\n break: ")
+		;(display break-point)
+		;(display "\n count: ")
+		;(display count)
+		;(display "\n caracter: ")
+		;(display "\n quebra?: ")
 		(display string)
 		(display quebra-linha)
 		(cond 
-			((empty? lista) (display "")) 
+			((empty? lista) #t) 
 			((zero? (remainder count break-point)) (core (rest lista) break-point (add1 count) (numero-caracter(first lista)) "\n"))
 			(else (core (rest lista) break-point (add1 count) (numero-caracter(first lista)) ""))
 		)
 	)
-	(and resolvido (core resolvido (tamanho-largura tamanho) 1 "\n\n" "")
-	)
+	(core (list-ref param 1) (tamanho-largura (last param)) 1 "\n/*-------------------*/ \n" "")
 )
 
 
@@ -471,33 +474,37 @@
 ;;   (6 15 15 9)     =>   [┏][╋][╋][┛]
 ;;   (1  5  5 0)          [╹][┃][┃][ ]
 ;;   (0  1  1 0))         [ ][╹][╹][ ]
-;; (resolver (tamanho 1 2) (list 1 2 3 4 5 6))
-(define (resolver tamanho lista-jogo)
-	(define (core solucao candidatos pendentes tamanho param)
-		(cond 
-			((and (empty? pendentes) (empty? candidatos)) solucao); retorna true
-			((empty? candidatos) #f); retorna false
-			(else
-				(if (seguro? (bin-dec (first candidatos)) solucao tamanho)  
-					(or (core 
-							(if (empty? solucao) 
-						        (list (bin-dec (first candidatos)))
-						        (append solucao (list (bin-dec (first candidatos))))
-						    ) 
-							(if (empty? pendentes) empty (gera-rotacoes-dec (last pendentes)))
-							(if (empty? pendentes) empty (drop-right pendentes 1))
-				            tamanho
-				            "seguro")
-						(core solucao  (rest candidatos) pendentes  tamanho "back")
-					)
-					(core solucao (rest candidatos) pendentes  tamanho "else")
+(define (resolver lido)
+	(define (rotate-seguro solucao pendentes tamanho list-rotacoes)
+
+		(cond
+			;;caso não haja resolução retorna (list false)
+			((empty? list-rotacoes) (list #f)) 
+			;;caso o jogo seja resolvido retorna (list true resolucao tamanho)
+			((seguro? (bin-dec (first list-rotacoes)) solucao tamanho)  
+				(if (first (core (if (empty? solucao) (list (bin-dec (first list-rotacoes))) (append solucao (list (bin-dec (first list-rotacoes))))) (drop-right pendentes 1)  tamanho))
+					(list #t solucao tamanho)	
+					(rotate-seguro solucao pendentes tamanho (rest list-rotacoes) )
 				)
 			)
+			(else (rotate-seguro solucao pendentes tamanho (rest list-rotacoes)))
 		)
 	)
-	(core  empty (gera-rotacoes-dec (last lista-jogo)) (drop-right lista-jogo 1) tamanho "Init")
-)
+	(define (exibe-solucao solucao )
+		(escrever-jogo-resolvido solucao)
+		solucao
+	)
+	(define (core solucao pendentes tamanho)
 
+		;(escrever-jogo-resolvido (list #t solucao tamanho))
+		(cond 
+			((empty? pendentes) (exibe-solucao(list #t solucao tamanho)))
+			((rotate-seguro solucao pendentes tamanho (gera-rotacoes (dec-bin(last pendentes)))) )
+		)
+	)
+	(core  empty (bilist-unilist(last lido)) (first lido))
+
+)
 
 
 ;; List String -> void
@@ -518,14 +525,9 @@
 ;;eof-object?
 
 (define (main args)
-	(define (separa-param retorno) 
-		;(escrever-jogo (resolver jogo-lido tamanho) tamanho)
-		(escrever-jogo (resolver (first retorno) (last retorno)) (first retorno))
-	)
-	(separa-param (ler-jogo args))
-)
+	(resolver (ler-jogo args))
 
-;(main "../testes/casos/erro.txt")
+)
 ;(main "../testes/casos/01.txt")
 ;(main "../testes/casos/02.txt")
 ;(main "../testes/casos/03.txt")
@@ -534,6 +536,7 @@
 ;(main "../testes/casos/06.txt")
 ;(main "../testes/casos/07.txt")
 ;(main "../testes/casos/08.txt")
+;(main "../testes/casos/erro.txt")
 ;(main "../testes/casos/09.txt")
 ;(main "../testes/casos/10.txt")
 ;(main "../testes/casos/11.txt")
@@ -548,7 +551,7 @@
 ;(main "../testes/casos/20.txt")
 ;(main "../testes/casos/aleatorio_10x10_curvas.txt")
 ;(main "../testes/casos/aleatorio_10x10_tudo.txt")
-;(main "../testes/casos/aleatorio_30x30_curvas.txt")
+(main "../testes/casos/aleatorio_30x30_curvas.txt")
 ;(main "../testes/casos/aleatorio_30x30_tudo.txt")
 ;(main "../testes/casos/aleatorio_50x50_curvas.txt")
-(main "../testes/casos/aleatorio_50x50_tudo.txt")
+;main "../testes/casos/aleatorio_50x50_tudo.txt")
