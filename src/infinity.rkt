@@ -88,10 +88,10 @@
 ;; Rotaciona um bloco 90 graus em sentido horário
 ;; Exemplo: (rotacionar (list 0 1 1 0))
 ;;          > (list 1 1 0 0)
-(define (rotacionar2 lista) 
+(define (rotacionar lista) 
 	(append (rest lista) (list (first lista))))
 
-(define (rotacionar lista) 
+(define (rotacionar2 lista) 
 	(append (list(last lista)) (drop-right lista 1)))
 
 (define (gera-rotacoes-dec num)
@@ -527,8 +527,8 @@
 
 ;(main "../testes/casos/erro.txt")
 ;(main "../testes/casos/01.txt")
-;(main "../testes/casos/02.txt")
-;(main "../testes/casos/03.txt")
+(main "../testes/casos/02.txt")
+(main "../testes/casos/03.txt")
 ;(main "../testes/casos/04.txt")
 ;(main "../testes/casos/05.txt")
 ;(main "../testes/casos/06.txt")
@@ -550,5 +550,5 @@
 ;(main "../testes/casos/aleatorio_10x10_tudo.txt")
 ;(main "../testes/casos/aleatorio_30x30_curvas.txt")
 ;(main "../testes/casos/aleatorio_30x30_tudo.txt")
+;(main "../testes/casos/aleatorio_50x50_tudo.txt")
 ;(main "../testes/casos/aleatorio_50x50_curvas.txt")
-(main "../testes/casos/aleatorio_50x50_tudo.txt")
